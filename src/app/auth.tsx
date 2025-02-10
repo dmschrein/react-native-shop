@@ -13,6 +13,7 @@ import { Redirect, Stack } from "expo-router";
 import { supabase } from "../lib/supabase";
 import { Toast } from "react-native-toast-notifications";
 import { useAuth } from "../providers/auth-provider";
+import React from "react";
 
 const authSchema = zod.object({
   email: zod.string().email({ message: "Invalid email address" }),
@@ -35,7 +36,10 @@ export default function Auth() {
   });
 
   const signIn = async (data: zod.infer<typeof authSchema>) => {
-    const { error } = await supabase.auth.signInWithPassword(data);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: data.email,
+      password: data.password,
+    });
 
     if (error) {
       alert(error.message);
@@ -49,7 +53,10 @@ export default function Auth() {
   };
 
   const signUp = async (data: zod.infer<typeof authSchema>) => {
-    const { error } = await supabase.auth.signUp(data);
+    const { error } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+    });
 
     if (error) {
       alert(error.message);
