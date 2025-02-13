@@ -1,6 +1,5 @@
 import { getProduct } from "@/api/api";
 import { useCartStore } from "@/store/cart-store";
-import { PRODUCTS } from "assets/products";
 import { Redirect, Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
@@ -24,7 +23,7 @@ const ProductDetails = () => {
 
   const cartItem = items.find((item) => item.id === product?.id);
 
-  const initialQuantity = cartItem ? cartItem.quantity : 1;
+  const initialQuantity = cartItem ? cartItem.quantity : 0;
 
   const [quantity, setQuantity] = useState(initialQuantity);
 
@@ -81,7 +80,7 @@ const ProductDetails = () => {
           <Text style={styles.price}>
             Unit Price: ${product.price.toFixed(2)}
           </Text>
-          <Text style={styles.price}>Ttotal Price: ${totalPrice}</Text>
+          <Text style={styles.price}>Total Price: ${totalPrice}</Text>
         </View>
 
         <FlatList

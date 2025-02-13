@@ -11,6 +11,7 @@ import {
 } from "react-native";
 //import { useCartStore } from "../store/cart-store";
 import { StatusBar } from "expo-status-bar";
+import { createOrder, createOrderItem } from "@/api/api";
 // import { createOrder, createOrderItem } from "../api/api";
 // import { openStripeCheckout, setupStripePaymentSheet } from "../lib/stripe";
 
@@ -76,23 +77,23 @@ export default function Cart() {
     incrementItem,
     decrementItem,
     getTotalPrice,
-    //resetCart,
+    resetCart,
   } = useCartStore();
-  // const { mutateAsync: createSupabaseOrder } = createOrder();
-  // const { mutateAsync: createSupabaseOrderItem } = createOrderItem();
+  const { mutateAsync: createSupabaseOrder } = createOrder();
+  const { mutateAsync: createSupabaseOrderItem } = createOrderItem();
 
   const handleCheckout = async () => {
     const totalPrice = parseFloat(getTotalPrice());
 
     try {
-      await setupStripePaymentSheet(Math.floor(totalPrice * 100));
+      // await setupStripePaymentSheet(Math.floor(totalPrice * 100));
 
-      const result = await openStripeCheckout();
+      // const result = await openStripeCheckout();
 
-      if (!result) {
-        Alert.alert("An error occurred while processing the payment");
-        return;
-      }
+      // if (!result) {
+      //   Alert.alert("An error occurred while processing the payment");
+      //   return;
+      // }
 
       await createSupabaseOrder(
         { totalPrice },
