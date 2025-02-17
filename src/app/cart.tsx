@@ -9,11 +9,9 @@ import {
   FlatList,
   Image,
 } from "react-native";
-//import { useCartStore } from "../store/cart-store";
 import { StatusBar } from "expo-status-bar";
 import { createOrder, createOrderItem } from "@/api/api";
-// import { createOrder, createOrderItem } from "../api/api";
-// import { openStripeCheckout, setupStripePaymentSheet } from "../lib/stripe";
+import { openStripeCheckout, setupStripePaymentSheet } from "@/lib/stripe";
 
 type CartItemType = {
   id: number;
@@ -86,40 +84,49 @@ export default function Cart() {
     const totalPrice = parseFloat(getTotalPrice());
 
     try {
-      // await setupStripePaymentSheet(Math.floor(totalPrice * 100));
+      console.log("Initializing Stripe payment sheet...");
+      await setupStripePaymentSheet(Math.floor(totalPrice * 100));
+      console.log("Stripe payment sheet initialized successfully.");
 
-      // const result = await openStripeCheckout();
+      const result = await openStripeCheckout();
 
-      // if (!result) {
-      //   Alert.alert("An error occurred while processing the payment");
-      //   return;
-      // }
+      if (!result) {
+        Alert.alert("An error occurred while processing the payment");
+        return;
+      }
+      console.log("Payment successful. Creating order in Supabase...");
 
-      await createSupabaseOrder(
-        { totalPrice },
-        {
-          onSuccess: (data) => {
-            createSupabaseOrderItem(
-              items.map((item) => ({
-                orderId: data.id,
-                productId: item.id,
-                quantity: item.quantity,
-              })),
-              {
-                onSuccess: () => {
-                  alert("Order created successfully");
-                  resetCart();
-                },
-              }
-            );
-          },
-        }
-      );
+      // Creating Order in Supabase
+      const orderData = await createSupabaseOrder({ totalPrice });
+
+      if (!orderData || !orderData.id) {
+        throw new Error("Failed to create order.");
+      }
+
+      console.log("Order created successfully:", orderData);
+
+      // Creating Order Items in Supabase
+      const orderItems = items.map((item) => ({
+        orderId: orderData.id,
+        productId: item.id,
+        quantity: item.quantity,
+      }));
+
+      await createSupabaseOrderItem(orderItems);
+
+      console.log("Order items added successfully.");
+      Alert.alert("Success", "Order created successfully!");
+
+      resetCart();
     } catch (error) {
-      console.error(error);
-      alert("An error occurred while creating the order");
+      console.error("Checkout Error:", error);
+      Alert.alert(
+        "Error",
+        error.message || "An error occurred while processing your order."
+      );
     }
   };
+
   return (
     <View style={styles.container}>
       <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
